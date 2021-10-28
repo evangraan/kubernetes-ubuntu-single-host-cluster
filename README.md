@@ -1,9 +1,8 @@
 # Introduction
 
-Setting up kubernetes can be daunting. This repository provides a quick and easy
-reference for setting up a development cluster on a single virtualization host.
+Setting up kubernetes can be daunting. This repository provides a quick and easy reference for setting up a development cluster on a single virtualization host.
 
-Helpful ops_* commands are provided to wrap kubeadm and kubectl commands.
+Helpful ```ops_*``` commands are provided to wrap kubeadm and kubectl commands.
 
 # Requirements
 
@@ -28,7 +27,7 @@ At least one worker node:
 # Setup of host
 
 1. Boot up the control nodes and worker nodes.
-2. Determine their IP addresses (either from your DHCP router or by 'ip a l' on the nodes after they have booted)
+2. Determine their IP addresses (either from your DHCP router or by ```ip a l``` on the nodes after they have booted)
 3. Place entries in the host OS's hosts file that resolves these IPs:
 
 ```
@@ -41,7 +40,7 @@ $ sudo vi /etc/hosts
 
 # Installation of control node
 
-Once Ubuntu 20.04 has been installed, copy the install_control.sh script onto the node:
+Once Ubuntu 20.04 has been installed, copy the ```install_control.sh``` script onto the node:
 
 From the host:
 
@@ -57,7 +56,7 @@ ssh $USER@k8s-control01
 $ sudo ./install_control.sh
 ```
 
-Copy the cluster's config to the user's home in $HOME/.kube/config
+Copy the cluster's config to the user's home in ```$HOME/.kube/config```
 ```
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
@@ -85,9 +84,11 @@ Initialize the cluster for your network and mask (e.g. ```192.168.1.0/24```):
 ./ops_start_cluster NETWORK/MASK
 ```
 
+*Important*: take careful note of the TOKEN and HASH that is printed. You will need these in order for workers to join. If you want to add more control nodes as well, also take note of the TOKEN and HASH for control nodes.
+
 # Installation of worker node
 
-Once Ubuntu 20.04 has been installed, copy the install_worker.sh script onto the node:
+Once Ubuntu 20.04 has been installed, copy the ```install_worker.sh``` script onto the node:
 
 From the host:
 
@@ -103,7 +104,8 @@ ssh $USER@k8s-worker01
 $ sudo ./install_worker.sh
 ```
 
-Copy the cluster's config from the control node (located in $HOME/.kube/config on the control node) and place it on the worked node in $HOME/.kube
+Copy the cluster's config from the control node (located in ```$HOME/.kube/config``` on the control node) and place it on the worked node in ```$HOME/.kube```
+
 ```
 mkdir -p $HOME/.kube
 # Copy control node config to $HOME/.kube/config
