@@ -1,0 +1,38 @@
+#!/bin/bash
+
+rm -rf $HOME/.kube
+
+sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+sudo swapoff -a
+
+sudo kubeadm reset
+rm -rf /run/kubernetes
+sudo kubeadm init \
+  --pod-network-cidr=192.168.1.0/24 \
+  --upload-certs \
+  --control-plane-endpoint=k8s-cluster
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+echo KUBECONFIG=~/.kube/config >> /bashrc
+export KUBECONFIG=~/.kube/config
+ernstv@k8s-control01:~$ vi ops_start_cluster 
+ernstv@k8s-control01:~$ 
+ernstv@k8s-control01:~$ 
+ernstv@k8s-control01:~$ 
+ernstv@k8s-control01:~$ 
+ernstv@k8s-control01:~$ 
+ernstv@k8s-control01:~$ 
+ernstv@k8s-control01:~$ vi ops_start_cluster 
+ernstv@k8s-control01:~$ ls
+calico.yaml  JOINING  ops_get_nodes  ops_node_status  ops_remove_worker  ops_start_cluster
+ernstv@k8s-control01:~$ cat ops_get_nodes
+#!/bin/bash
+kubectl get nodes
+echo "Press ENTER to describe nodes (q) to quit"
+read -n 1 waiting
+if [ "$waiting" == "q" -o "$waiting" == "Q" ]; then
+  exit 0
+fi
+kubectl describe nodes

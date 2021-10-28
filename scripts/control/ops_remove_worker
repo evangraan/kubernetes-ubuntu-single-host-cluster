@@ -1,0 +1,7 @@
+#!/bin/bash
+kubectl describe nodes
+ernstv@k8s-control01:~$ cat ops_remove_worker 
+#!/bin/bash
+kubectl cordon  $1
+kubectl drain $1 --force --ignore-daemonsets  --delete-emptydir-data
+kubectl delete node $1

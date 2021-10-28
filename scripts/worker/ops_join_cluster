@@ -1,0 +1,27 @@
+#!/bin/bash
+if [ "$1" == "" -o "$2" == "" ]; then
+  echo "Usage: ops_join_cluster TOKEN HASH"
+  echo "TOKEN and HASH are outputs of the control plane kubeadm init command"
+  exit 1
+fi
+
+sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+sudo swapoff -a
+
+sudo kubeadm reset
+sudo kubeadm join k8s-cluster:6443 --token $1 --discovery-token-ca-cert-hash $2
+if [ -e $HOME/.kube ]; then
+  echo "$HOME/.kube exists"
+else
+  mkdir .kube
+fi
+echo "COPY k8s-control01:$HOME/.kube/config => $HOME/.kube/config THEN press ENTER"
+read waiting
+if [ -e .kube/config ]; then
+  chown $(id -u):$(id -g) $HOME/.kube/config
+  kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+else
+  echo "Error: $HOME/.kube/config not found"
+  exit 1
+fi
+
