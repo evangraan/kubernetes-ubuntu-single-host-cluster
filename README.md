@@ -158,4 +158,4 @@ sudo ip route add 192.168.1.239 dev enp0s3
 
 # Issues
 
-See DEBUGGING.md to find solutions to common problems
+See [DEBUGGING](DEBUGGING.md) to find solutions to common problems
