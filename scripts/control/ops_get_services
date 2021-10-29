@@ -1,0 +1,8 @@
+#!/bin/bash
+kubectl get services
+echo "Press ENTER to describe services (q) to quit"
+read -n 1 waiting
+if [ "$waiting" == "q" -o "$waiting" == "Q" ]; then
+  exit 0
+fi
+kubectl describe services

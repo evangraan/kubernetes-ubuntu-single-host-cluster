@@ -156,6 +156,39 @@ sudo ip route add 192.168.1.239 dev enp0s3
 
 # App deployment
 
+To deploy an example echo service to test that deployment works, on a control node:
+
+```
+kubectl create deployment hello-node --image=k8s.gcr.io/echoserver:1.4
+```
+
+You can see details about the pod:
+
+```
+./ops_get_pods
+```
+
+You can see details about the deployment:
+
+```
+./ops_get_deployment
+```
+
+Expose the app as a service so that you can access it:
+```
+kubectl expose deployment hello-node --type=LoadBalancer --port=8080
+```
+
+View the service in the services list and note the CLUSTER-IP:
+```
+./ops_get_services
+```
+
+Test that the app is running by sending it some data and seeing the echo:
+```
+curl -X POST -d 'test' CLUSTER-IP:8080
+```
+
 # Issues
 
 See [DEBUGGING](DEBUGGING.md) to find solutions to common problems
