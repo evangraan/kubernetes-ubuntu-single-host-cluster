@@ -204,6 +204,17 @@ Point a browser on the development device to http://localhost:8080 to consume th
 curl -X POST -d 'test' localhost:8080
 ```
 
+MetalLB : TBD
+Other method examples: TBD
+
+# Scaling
+
+TBD
+
+# Storage
+
+ZFS + DRBD: TBD
+
 # Issues
 
 See [DEBUGGING](DEBUGGING.md) to find solutions to common problems
