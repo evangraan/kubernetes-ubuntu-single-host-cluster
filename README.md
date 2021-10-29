@@ -189,6 +189,21 @@ Test that the app is running by sending it some data and seeing the echo:
 curl -X POST -d 'test' CLUSTER-IP:8080
 ```
 
+# External access to the app
+Kubernetes provides a number of methods to allow external access to the cluster to consume services.
+
+For simple testing, one can also simply do SSH tunneling to the cluster IP:
+
+```
+ssh -L 8080:CLUSTER-IP:8080 $USER@k8s-control01
+```
+
+Point a browser on the development device to http://localhost:8080 to consume the service (or use curl)
+
+```
+curl -X POST -d 'test' localhost:8080
+```
+
 # Issues
 
 See [DEBUGGING](DEBUGGING.md) to find solutions to common problems
