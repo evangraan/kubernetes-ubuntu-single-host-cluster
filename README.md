@@ -128,6 +128,15 @@ Join the cluster using the cluster token and hash:
 ./ops_join_cluster TOKEN HASH
 ```
 
+# Helm package manager
+On the control node, install helm:
+
+```
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
+```
+
 # Static network routing (optional)
 
 If you have trouble connecting to your control or worker nodes from a development device on the same network, or your workers do not become Ready and
@@ -216,10 +225,38 @@ curl -vvv -X POST -d 'tester' http://k8s-cluster:32750
 ```
 
 ## Load balancer
-If there is an upstream node balancer:
+Use MetalLB as a load balancer:
 
 ```
-kubectl expose service hello-node-service --type=LoadBalancer --name=hello-node-service-external TBD (is this correct?)
+vi metallb.yaml
+
+  address-pools:
+   - name: default
+     protocol: layer2
+     addresses:
+     - LAN-CIDR/MASK-FOR-RESERVED-IP-POOL
+     # e.g. 192.168.1.0/26 (.1 - .64 reserved for MetalLB)
+
+helm repo add metallb https://metallb.github.io/metallb
+helm install metallb metallb/metallb -f metallb.yaml
+```
+
+Then expose services so:
+```
+kubectl expose deployment hello-node --port=8765 --target-port=8080 --name=hello-node-service --type=LoadBalancer
+```
+
+Check the ports and IPs to which the service have been mapped:
+```
+$ kubectl get service
+NAME               TYPE         CLUSTER-IP    EXTERNAL-IP PORT(S)        AGE
+hello-node-service LoadBalancer 10.108.87.253 192.168.1.1 8765:31719/TCP 2s
+kubernetes         ClusterIP    10.96.0.1     <none>      443/TCP        4h56m
+```
+
+Test the service access:
+```
+curl -vvv -X POST -d 'tester' http://192.168.1.1:8765
 ```
 
 ## SSH tunnel
