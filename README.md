@@ -32,21 +32,22 @@ At least one worker node:
 
 ```
 $ sudo vi /etc/hosts
-192.168.1.155 k8s-cluster
-192.168.1.155 k8s-control01
-192.168.1.187 k8s-worker01
-192.168.1.193 k8s-worker02
+192.168.1.109 k8s-cluster
+192.168.1.109 k8s-control01
+192.168.1.147 k8s-worker01
+192.168.1.98 k8s-worker02
 ```
 
 # Installation of control node
 
-Once Ubuntu 20.04 has been installed, copy the ```install_control.sh``` script onto the node:
+Once Ubuntu 20.04 has been installed, copy ```scripts/control/*``` script onto the node:
 
 From the host:
 
 ```
 cd kubernetes-ubuntu-single-host-cluster
 scp scripts/control/* $USER@k8s-control01:
+ssh $USER@k8s-control01 "chmod +x install* ops*"
 ```
 
 Log into the worker and run the script:
@@ -56,45 +57,39 @@ ssh $USER@k8s-control01
 $ sudo ./install_control.sh
 ```
 
-Copy the cluster's config to the user's home in ```$HOME/.kube/config```
-```
-mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
-```
-
 Place entries in the node hosts file that resolves these IPs:
 
 ```
 $ sudo vi /etc/hosts
-192.168.1.155 k8s-cluster
-192.168.1.155 k8s-control01
-192.168.1.187 k8s-worker01
-192.168.1.193 k8s-worker02
+192.168.1.109 k8s-cluster
+192.168.1.109 k8s-control01
+192.168.1.147 k8s-worker01
+192.168.1.98 k8s-worker02
 ```
 
-Install the calico CNI:
-```
-./install_calico_cni.sh
-```
-
-
-Initialize the cluster for your network and mask (e.g. ```192.168.1.0/24```):
+Initialize the cluster for your network and mask (e.g. ```192.168.2.0/24```)
+Note: make sure the CIDR differs from the host's network.
 ```
 ./ops_start_cluster NETWORK/MASK
 ```
 
 *Important*: take careful note of the TOKEN and HASH that is printed. You will need these in order for workers to join. If you want to add more control nodes as well, also take note of the TOKEN and HASH for control nodes.
 
+Install the calico CNI:
+```
+./install_calico_cni.sh
+```
+
 # Installation of worker node
 
-Once Ubuntu 20.04 has been installed, copy the ```install_worker.sh``` script onto the node:
+Once Ubuntu 20.04 has been installed, copy ```scripts/worker/*``` script onto the node:
 
 From the host:
 
 ```
 cd kubernetes-ubuntu-single-host-cluster
 scp scripts/worker/* $USER@k8s-worker01:
+ssh $USER@k8s-worker01 "chmod +x install* ops*"
 ```
 
 Log into the worker and run the script:
@@ -108,7 +103,7 @@ Copy the cluster's config from the control node (located in ```$HOME/.kube/confi
 
 ```
 mkdir -p $HOME/.kube
-# Copy control node config to $HOME/.kube/config
+scp $USER@k8s-control01:.kube/config $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 
@@ -116,10 +111,10 @@ Place entries in the node hosts file that resolves these IPs:
 
 ```
 $ sudo vi /etc/hosts
-192.168.1.155 k8s-cluster
-192.168.1.155 k8s-control01
-192.168.1.187 k8s-worker01
-192.168.1.193 k8s-worker02
+192.168.1.109 k8s-cluster
+192.168.1.109 k8s-control01
+192.168.1.147 k8s-worker01
+192.168.1.98 k8s-worker02
 ```
 
 Install the calico CNI:
@@ -133,11 +128,15 @@ Join the cluster using the cluster token and hash:
 ./ops_join_cluster TOKEN HASH
 ```
 
-# Static network routing
+# Static network routing (optional)
 
 If you have trouble connecting to your control or worker nodes from a development device on the same network, or your workers do not become Ready and
 report Kubelet stopped posting node status, this may be due to your network
-characteristics. The cluster network might not be able to properly route packets between the node. This might be due to your router and/or your virtualization host networking. This problem can be solved by network layer
+characteristics / issues.
+
+First, make sure the CIDR you initialized the cluster with is different from your host network.
+
+If it is, the cluster network might not be able to properly route packets between the node. This might be due to your router and/or your virtualization host networking. This problem can be solved by network layer
 routing (static IP routing.)
 
 For each worker, ensure that it has a static ip route to the controller.
@@ -176,7 +175,7 @@ You can see details about the deployment:
 
 Expose the app as a service so that you can access it:
 ```
-kubectl expose deployment hello-node --type=LoadBalancer --port=8080
+kubectl expose deployment hello-node --type=NodePort --name=hello-node-service --port=8080
 ```
 
 View the service in the services list and note the CLUSTER-IP:
@@ -192,6 +191,38 @@ curl -X POST -d 'test' CLUSTER-IP:8080
 # External access to the app
 Kubernetes provides a number of methods to allow external access to the cluster to consume services.
 
+## Nodeport
+
+Note: if your deployment specified type NodePort, there is no need to also expose the service again.
+```
+kubectl expose service hello-node-service --type=NodePort --name=hello-node-service-external
+```
+
+In both cases, if you do:
+
+```
+kubectl get service
+```
+
+on the *worker* nodes after exposing with type NodePort, the output should include in the PORT(s) columns a value like this:
+```
+8080:32750(TCP)
+```
+
+You can then access the service / deployment on that worker node directly:
+
+```
+curl -vvv -X POST -d 'tester' http://k8s-cluster:32750
+```
+
+## Load balancer
+If there is an upstream node balancer:
+
+```
+kubectl expose service hello-node-service --type=LoadBalancer --name=hello-node-service-external TBD (is this correct?)
+```
+
+## SSH tunnel
 For simple testing, one can also simply do SSH tunneling to the cluster IP:
 
 ```
@@ -213,7 +244,8 @@ TBD
 
 # Storage
 
-ZFS + DRBD: TBD
+Linstor + DRBD _ ZFS: https://brian-candler.medium.com/linstor-networked-storage-without-the-complexity-c3178960ce6b
+TBD
 
 # Issues
 

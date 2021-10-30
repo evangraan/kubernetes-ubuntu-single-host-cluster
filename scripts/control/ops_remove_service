@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ "$1" == "" ]; then
+  echo "Usage: ops_delete_service SERVICE-NAME"
+  exit 1
+fi
+
+kubectl delete svc $1

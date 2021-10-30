@@ -1,8 +1,8 @@
 #!/bin/bash
-kubectl get nodes
-echo "Press ENTER to describe nodes (q) to quit"
+kubectl get pods
+echo "Press ENTER to describe pods (q) to quit"
 read -n 1 waiting
 if [ "$waiting" == "q" -o "$waiting" == "Q" ]; then
   exit 0
 fi
-kubectl describe nodes
+kubectl describe pods
