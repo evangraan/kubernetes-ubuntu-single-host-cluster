@@ -221,7 +221,7 @@ on the *worker* nodes after exposing with type NodePort, the output should inclu
 You can then access the service / deployment on that worker node directly:
 
 ```
-curl -vvv -X POST -d 'tester' http://k8s-cluster:32750
+curl -vvv -X POST -d 'tester' http://k8s-worker-01:32750
 ```
 
 ## Load balancer
@@ -235,7 +235,7 @@ vi metallb.yaml
      protocol: layer2
      addresses:
      - LAN-CIDR/MASK-FOR-RESERVED-IP-POOL
-     # e.g. 192.168.1.0/26 (.1 - .64 reserved for MetalLB)
+     # e.g. 192.168.1.0/26 (.0 - .63 reserved for MetalLB)
 
 helm repo add metallb https://metallb.github.io/metallb
 helm install metallb metallb/metallb -f metallb.yaml
@@ -254,7 +254,7 @@ hello-node-service LoadBalancer 10.108.87.253 192.168.1.1 8765:31719/TCP 2s
 kubernetes         ClusterIP    10.96.0.1     <none>      443/TCP        4h56m
 ```
 
-Test the service access:
+Test service access using the external IP and port listed:
 ```
 curl -vvv -X POST -d 'tester' http://192.168.1.1:8765
 ```
