@@ -51,7 +51,7 @@ Vagrant.configure(2) do |config|
 
     if [ -e install_control.sh ]; then ./install_control.sh; fi
     if [ -e install_worker.sh ]; then ./install_worker.sh; fi
-    if [ -e ops_start_cluster ]; then ./ops_start_cluster 192.168.2.0/24; fi
+    if [ -e ops_start_cluster ]; then sudo -H -u vagrant bash -c "cd /home/vagrant && ./ops_start_cluster 192.168.2.0/24"; fi
 
     mkdir -p /home/vagrant/.kube
     if [ -e install_kube_config.sh ]; then
@@ -61,7 +61,7 @@ Vagrant.configure(2) do |config|
     fi
     chown -R vagrant:vagrant /home/vagrant/.kube
 
-    if [ -e install_calico_cni.sh ]; then ./install_calico_cni.sh ; fi
+    if [ -e install_calico_cni.sh ]; then sudo -H -u vagrant bash -c "cd /home/vagrant && ./install_calico_cni.sh" ; fi
   SHELL
 
 end
