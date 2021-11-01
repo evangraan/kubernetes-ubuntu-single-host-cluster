@@ -1,0 +1,7 @@
+#!/bin/bash
+RESULT=$(kubeadm token create --print-join-command)
+echo "$RESULT" > latest-join
+TOKEN=$(echo "$RESULT" | cut -d ' ' -f5)
+HASH=$(echo "$RESULT" | cut -d ' ' -f7)
+echo $TOKEN > join-token
+echo $HASH > join-hash

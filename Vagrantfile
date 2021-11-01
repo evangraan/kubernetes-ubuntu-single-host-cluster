@@ -62,6 +62,18 @@ Vagrant.configure(2) do |config|
     chown -R vagrant:vagrant /home/vagrant/.kube
 
     if [ -e install_calico_cni.sh ]; then sudo -H -u vagrant bash -c "cd /home/vagrant && ./install_calico_cni.sh" ; fi
-  SHELL
 
+    if [[ "$HOSTNAME" =~ ^k8s-control ]]; then
+      sudo -H -u vagrant bash -c "./ops_generate_join_tokens"
+    fi
+    if [[ "$HOSTNAME" =~ ^k8s-worker ]]; then
+      scp -i /home/vagrant/.ssh/test-id_rsa -o "StrictHostKeyChecking no" vagrant@k8s-control01:join-token /home/vagrant/
+      chown -R vagrant:vagrant /home/vagrant/join-token
+      scp -i /home/vagrant/.ssh/test-id_rsa -o "StrictHostKeyChecking no" vagrant@k8s-control01:join-hash /home/vagrant/
+      chown -R vagrant:vagrant /home/vagrant/join-hash
+      TOKEN=$(cat join-token | sed 's/\n//g')
+      HASH=$(cat join-jash | sed 's/\n//g')
+      sudo -H -u vagrant bash -c "./ops_join_cluster $TOKEN $HASH"
+    fi
+  SHELL
 end
