@@ -42,11 +42,10 @@ Vagrant.configure(2) do |config|
     chmod +x *.sh
     chmod +x ops*
     chown vagrant:vagrant *
-    mkdir /home/vagrant/test-keys
     cp -f kubernetes-ubuntu-single-host-cluster/test-keys/* /home/vagrant/.ssh/
     chmod 0600 /home/vagrant/.ssh/test-id_rsa
     cat .ssh/test-id_rsa.pub >> .ssh/authorized_keys
-    chown -R vagrant:vagrant ~/.ssh
+    chown -R vagrant:vagrant /home/vagrant/.ssh
     rm -rf kubernetes-ubuntu-single-host-cluster
     rm -rf test-keys
 
