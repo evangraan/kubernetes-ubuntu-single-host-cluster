@@ -83,9 +83,7 @@ Vagrant.configure(2) do |config|
       chown -R vagrant:vagrant /home/vagrant/join-token
       scp -i /home/vagrant/.ssh/test-id_rsa -o "StrictHostKeyChecking no" vagrant@k8s-control01:join-hash /home/vagrant/
       chown -R vagrant:vagrant /home/vagrant/join-hash
-      TOKEN=$(cat /home/vagrant/join-token | sed 's/\n//g')
-      HASH=$(cat /home/vagrant/join-hash | sed 's/\n//g')
-      sudo -H -u vagrant bash -c "./ops_join_cluster $TOKEN $HASH --no-wait"
+      sudo -H -u vagrant bash -c "./ops_join_cluster"
     fi
   SHELL
 end

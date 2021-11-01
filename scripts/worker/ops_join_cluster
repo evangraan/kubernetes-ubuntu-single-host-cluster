@@ -1,22 +1,40 @@
 #!/bin/bash
-if [ "$1" == "" -o "$2" == "" ]; then
-  echo "Usage: ops_join_cluster TOKEN HASH [--no-wait]"
-  echo "TOKEN and HASH are outputs of the control plane kubeadm init command"
-  exit 1
+AUTO=0
+WAIT=1
+
+if [ -e join-token -a -e join-hash ]; then
+  TOKEN=$(cat /home/vagrant/join-token | sed 's/\n//g')
+  HASH=$(cat /home/vagrant/join-hash | sed 's/\n//g')
+  WAIT=0
+fi
+
+if [ "$AUTO" == "0" ]; then
+  if [ "$1" == "" -o "$2" == "" ]; then
+    echo "Usage: ops_join_cluster TOKEN HASH [--no-wait]"
+    echo "TOKEN and HASH are outputs of the control plane kubeadm init command"
+    exit 1
+  fi
+
+  TOKEN=$1
+  HASH=$2
+  WAIT=1
+  if [ "$3" == "--no-wait" ]; then
+    WAIT=0
+  fi
 fi
 
 sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
 sudo swapoff -a
 
 sudo kubeadm reset -f
-sudo kubeadm join k8s-cluster:6443 --token $1 --discovery-token-ca-cert-hash $2
+sudo kubeadm join k8s-cluster:6443 --token $TOKEN --discovery-token-ca-cert-hash $HASH
 if [ -e $HOME/.kube ]; then
   echo "$HOME/.kube exists"
 else
   mkdir .kube
 fi
 
-if [ "$3" != "--no-wait" ]; then
+if [ "$WAIT" != "0" ]; then
   echo "COPY k8s-control01:$HOME/.kube/config => $HOME/.kube/config THEN press ENTER"
   read waiting
 fi
