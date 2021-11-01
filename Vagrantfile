@@ -28,7 +28,7 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision "shell", inline: <<-SHELL
     echo "192.168.1.10 k8s-cluster" >> /etc/hosts
-    echo "192.168.1.10 k8s-cluster01" >> /etc/hosts
+    echo "192.168.1.10 k8s-control01" >> /etc/hosts
     echo "192.168.1.11 k8s-worker01" >> /etc/hosts
     echo "192.168.1.12 k8s-worker02" >> /etc/hosts
     git clone https://github.com/evangraan/kubernetes-ubuntu-single-host-cluster
@@ -45,8 +45,9 @@ Vagrant.configure(2) do |config|
     cp -f kubernetes-ubuntu-single-host-cluster/test-keys/* /home/vagrant/.ssh/
     chmod 0600 /home/vagrant/.ssh/test-id_rsa
     cat .ssh/test-id_rsa.pub >> .ssh/authorized_keys
+    chown vagrant:vagrant ~/.ssh/*
     rm -rf kubernetes-ubuntu-single-host-cluster
-
+    rm -rf test-keys
 
     if [ -e install_control.sh ]; then ./install_control.sh; fi
     if [ -e install_worker.sh ]; then ./install_worker.sh; fi
@@ -54,11 +55,11 @@ Vagrant.configure(2) do |config|
 
     mkdir -p /home/vagrant/.kube
     if [ -e /home/vagrant/.kube/config ]; then
-      echo "kube config already exists"
+      ./install_kube_config.sh
     else
-      scp -o "StrictHostKeyChecking no" vagrant@k8s-control01:.kube/config /home/vagrant/.kube/config
-      chown $(id -u):$(id -g) /home/vagrant/.kube/config
+      scp -i /home/vagrant/.ssh/test-id_rsa -o "StrictHostKeyChecking no" vagrant@k8s-control01:.kube/config /home/vagrant/.kube/config
     fi
+    chown -R $(id -u):$(id -g) /home/vagrant/.kube
 
     if [ -e install_calico_cni.sh ]; then ./install_calico_cni.sh ; fi
     if [[ "$HOSTNAME" =~ ^k8s-worker ]]; then
