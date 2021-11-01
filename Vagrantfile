@@ -41,11 +41,12 @@ Vagrant.configure(2) do |config|
     fi
     chmod +x *.sh
     chmod +x ops*
+    chown vagrant:vagrant *
     mkdir /home/vagrant/test-keys
     cp -f kubernetes-ubuntu-single-host-cluster/test-keys/* /home/vagrant/.ssh/
     chmod 0600 /home/vagrant/.ssh/test-id_rsa
     cat .ssh/test-id_rsa.pub >> .ssh/authorized_keys
-    chown vagrant:vagrant ~/.ssh/*
+    chown -R vagrant:vagrant ~/.ssh
     rm -rf kubernetes-ubuntu-single-host-cluster
     rm -rf test-keys
 
@@ -54,12 +55,12 @@ Vagrant.configure(2) do |config|
     if [ -e ops_start_cluster ]; then ./ops_start_cluster 192.168.2.0/24; fi
 
     mkdir -p /home/vagrant/.kube
-    if [ -e /home/vagrant/.kube/config ]; then
+    if [[ "$HOSTNAME" =~ ^k8s-control ]]; then
       ./install_kube_config.sh
     else
       scp -i /home/vagrant/.ssh/test-id_rsa -o "StrictHostKeyChecking no" vagrant@k8s-control01:.kube/config /home/vagrant/.kube/config
     fi
-    chown -R $(id -u):$(id -g) /home/vagrant/.kube
+    chown -R vagrant:vagrant /home/vagrant/.kube
 
     if [ -e install_calico_cni.sh ]; then ./install_calico_cni.sh ; fi
     if [[ "$HOSTNAME" =~ ^k8s-worker ]]; then
