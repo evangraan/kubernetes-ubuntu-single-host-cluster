@@ -1,6 +1,6 @@
 #!/bin/bash
 if [ "$1" == "" -o "$2" == "" ]; then
-  echo "Usage: ops_join_cluster TOKEN HASH"
+  echo "Usage: ops_join_cluster TOKEN HASH [--no-wait]"
   echo "TOKEN and HASH are outputs of the control plane kubeadm init command"
   exit 1
 fi
@@ -15,8 +15,11 @@ if [ -e $HOME/.kube ]; then
 else
   mkdir .kube
 fi
-echo "COPY k8s-control01:$HOME/.kube/config => $HOME/.kube/config THEN press ENTER"
-read waiting
+
+if [ "$3" != "--no-wait" ]; then
+  echo "COPY k8s-control01:$HOME/.kube/config => $HOME/.kube/config THEN press ENTER"
+  read waiting
+fi
 if [ -e .kube/config ]; then
   chown $(id -u):$(id -g) $HOME/.kube/config
   kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
