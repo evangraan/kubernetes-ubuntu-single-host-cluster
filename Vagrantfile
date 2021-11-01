@@ -26,6 +26,18 @@ Vagrant.configure(2) do |config|
     subconfig.vm.network :public_network, ip: "192.168.1.11", nic_type: "virtio", bridge: "en1: Wi-Fi (AirPort)"
   end
 
+  config.vm.define "k8s-worker02" do |subconfig|
+    subconfig.vm.provider "virtualbox" do |vb|
+      vb.gui = false
+      vb.name = "k8s-worker02"
+        vb.memory = "4096"
+        vb.cpus = "2"
+      end
+    subconfig.vm.hostname = "k8s-worker02"
+    subconfig.vm.box = BOX_IMAGE
+    subconfig.vm.network :public_network, ip: "192.168.1.12", nic_type: "virtio", bridge: "en1: Wi-Fi (AirPort)"
+  end
+
   config.vm.provision "shell", inline: <<-SHELL
     echo "192.168.1.10 k8s-cluster" >> /etc/hosts
     echo "192.168.1.10 k8s-control01" >> /etc/hosts
