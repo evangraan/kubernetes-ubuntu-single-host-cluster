@@ -39,25 +39,31 @@ Vagrant.configure(2) do |config|
     if [[ "$HOSTNAME" =~ ^k8s-worker ]]; then
       cp kubernetes-ubuntu-single-host-cluster/scripts/worker/* .
     fi
-    rm -rf kubernetes-ubuntu-single-host-cluster
     chmod +x *.sh
     chmod +x ops*
+    mkdir /home/vagrant/test-keys
+    cp -f kubernetes-ubuntu-single-host-cluster/test-keys/* /home/vagrant/.ssh/
+    chmod 0600 /home/vagrant/.ssh/test-id_rsa
+    cat .ssh/test-id_rsa.pub >> .ssh/authorized_keys
+    rm -rf kubernetes-ubuntu-single-host-cluster
 
-    mkdir .ssh
-    chmod go-rwx .ssh
-    cp kubernetes-ubuntu-single-host-cluster/test-keys/* .ssh/
-    chmod 0600 .ssh/id_rsa
-    chmod 0600 .ssh/authorized_keys
-    mkdir .kube
-    scp -o "StrictHostKeyChecking no" vagrant@k8s-control01:.kube/config .kube/config
-    chown $(id -u):$(id -g) .kube/config
 
     if [ -e install_control.sh ]; then ./install_control.sh; fi
-    if [ -e ops_start_cluster ]; then ./ops_start_cluster 192.168.2.0/24; fi
     if [ -e install_worker.sh ]; then ./install_worker.sh; fi
+    if [ -e ops_start_cluster ]; then ./ops_start_cluster 192.168.2.0/24; fi
+
+    mkdir -p /home/vagrant/.kube
+    if [ -e /home/vagrant/.kube/config ]; then
+      echo "kube config already exists"
+    else
+      scp -o "StrictHostKeyChecking no" vagrant@k8s-control01:.kube/config /home/vagrant/.kube/config
+      chown $(id -u):$(id -g) /home/vagrant/.kube/config
+    fi
+
     if [ -e install_calico_cni.sh ]; then ./install_calico_cni.sh ; fi
-    if [ -e install_kube_config.sh ]; then ./install_kube_config.sh; fi
-    if [ -e ops_get_nodes ]; then ./ops_get_nodes; fi
+    if [[ "$HOSTNAME" =~ ^k8s-worker ]]; then
+      if [ -e install_kube_config.sh ]; then ./install_kube_config.sh; fi
+    fi
   SHELL
 
 end
