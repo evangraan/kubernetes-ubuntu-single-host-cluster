@@ -5,6 +5,7 @@ WAIT=1
 if [ -e join-token -a -e join-hash ]; then
   TOKEN=$(cat /home/vagrant/join-token | sed 's/\n//g')
   HASH=$(cat /home/vagrant/join-hash | sed 's/\n//g')
+  AUTO=1
   WAIT=0
 fi
 
