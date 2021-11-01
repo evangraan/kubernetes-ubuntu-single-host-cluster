@@ -56,7 +56,7 @@ Vagrant.configure(2) do |config|
 
     mkdir -p /home/vagrant/.kube
     if [ -e install_kube_config.sh ]; then
-      ./install_kube_config.sh
+      sudo -H -u vagrant bash -c "cd /home/vagrant && ./install_kube_config.sh"
     else
       scp -i /home/vagrant/.ssh/test-id_rsa -o "StrictHostKeyChecking no" vagrant@k8s-control01:.kube/config /home/vagrant/.kube/config
     fi
