@@ -4,6 +4,30 @@ Setting up kubernetes can be daunting. This repository provides a quick and easy
 
 Helpful ```ops_*``` commands are provided to wrap kubeadm and kubectl commands.
 
+This repo was tested with VirtualBox on maxOS Catalina and Windows 10
+
+# Automated provisioning
+
+The sections below detail step-by-step manual setup of the cluster. If you would like to set it up automatically, tweak the Vagrantfile in this repository to your needs. This Vagrantfile works with VirtualBox. Install vagrant on your host. Then:
+
+```
+vagrant up
+```
+
+To clean up (destroy) the cluster VMs and release resources:
+
+```
+vagrant destroy
+```
+
+To SSH into systems:
+
+```
+vagrant ssh k8s-control01
+vagrant ssh k8s-worker01
+vagrant ssh k8s-worker02
+```
+
 # Requirements
 
 At least one control node:
@@ -11,18 +35,20 @@ At least one control node:
 1. hostname: k8s-control01
 2. 4 Gb RAM
 3. 2 CPUs
-4. Networking such that internet access is available and worker nodes are reachable
-5. Ubuntu 20.04 installed on the VM
-6. For convenience, make the username on the node the same on each node and the same as your host username
+4. 30 Gb disk
+5. Networking such that internet access is available and worker nodes are reachable
+6. Ubuntu 20.04 installed on the VM
+7. For convenience, make the username on the node the same on each node and the same as your host username
 
 At least one worker node:
 
 1. hostname: k8s-worker01
 2. 4 Gb RAM
 3. 2 CPUs
-4. Networking such that internet access is available and worker nodes and control plane nodes are reachable
-5. Ubuntu 20.04 installed on the VM
-6. For convenience, make the username on the node the same on each node and the same as your host username
+4. 30 Gb disk
+5. Networking such that internet access is available and worker nodes and control plane nodes are reachable
+6. Ubuntu 20.04 installed on the VM
+7. For convenience, make the username on the node the same on each node and the same as your host username
 
 # Setup of host
 
@@ -135,31 +161,6 @@ On the control node, install helm:
 curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
 chmod 700 get_helm.sh
 ./get_helm.sh
-```
-
-# Static network routing (optional)
-
-If you have trouble connecting to your control or worker nodes from a development device on the same network, or your workers do not become Ready and
-report Kubelet stopped posting node status, this may be due to your network
-characteristics / issues.
-
-First, make sure the CIDR you initialized the cluster with is different from your host network.
-
-If it is, the cluster network might not be able to properly route packets between the node. This might be due to your router and/or your virtualization host networking. This problem can be solved by network layer
-routing (static IP routing.)
-
-For each worker, ensure that it has a static ip route to the controller.
-For the controller, ensure that it has a static IP to each worker.
-For each node, ensure that it has a static route to the development device.
-
-Determine the interface for your network and then do:
-```
-sudo ip route add IP dev INTERFACE
-```
-
-Example:
-```
-sudo ip route add 192.168.1.239 dev enp0s3
 ```
 
 # App deployment
@@ -280,6 +281,67 @@ Other method examples: TBD
 TBD
 
 # Storage
+
+Since the requirements for this reference implementation required 30 Gb of disk space for each node, there should be at least 8 Gb of disk space available on all nodes.
+
+You could create a separate VM as the Linstor controller and two additional VMs as storage nodes. In this implementation how-ever I use control01 as the Linstor controller of type 'combined', i.e. it is also a storage node and worker01 and worker02 as storage nodes.
+
+If you choose to dedicate storage nodes, then on the kubernetes cluster you will need to make the storage available using 
+
+```
+linstor resource create NODE-NAME k8_storage_res --drbd-diskless
+```
+
+in order to access it from the worker containers as persistent volumes.
+
+## Installation of Linstor, DRBD and LVM
+On all 3 nodes:
+
+```
+sudo -i
+add-apt-repository -y ppa:linbit/linbit-drbd9-stack; apt-get update; apt-get install -y --no-install-recommends drbd-dkms drbd-utils lvm2 linstor-satellite linstor-client
+```
+
+Only on control01 (the Linstor controller):
+```
+sudo apt-get install linstor-controller --no-install-recommends
+sudo systemctl enable --now linstor-controller
+linstor node list
+```
+
+There should be no nodes listed.
+
+Add control01, worker01 and worker02 as nodes. This all takes place in the control01 node shell:
+```
+linstor node create k8s-control01 192.168.1.109 --node-type combined
+linstor node create k8s-worker01 192.168.1.148
+linstor node create k8s-worker02 192.168.1.98
+linstor node list
+```
+
+Find the name of the volume group (VGROUPNAME, in the example below all VMs have the same volume group name 'ubuntu-vg') on each node:
+```
+vgs
+```
+
+Now add a storage pool:
+
+```
+linstor storage-pool create lvm k8s-control01 pool_k8s ubuntu-vg
+linstor storage-pool create lvm k8s-worker01 pool_k8s ubuntu-vg
+linstor storage-pool create lvm k8s-worker02 pool_k8s ubuntu-vg
+linstor storage-pool list
+```
+Note: this can take a long time and you might receive an error: 'Socket timeout, no data received for more than 300s'. If the storage-pool list command how-ever shows all the volumes and their statuses are OK, all should be good.
+
+Create the distributed storage volume group and storage resources:
+```
+linstor resource-group create k8s_storage_group --storage-pool pool_k8s --place-count 2
+linstor volume-group create k8s_storage_group
+linstor resource-group spawn-resources k8s_storage_group k8_storage_res 6G
+linstor resource list
+```
+
 
 Linstor + DRBD _ ZFS: https://brian-candler.medium.com/linstor-networked-storage-without-the-complexity-c3178960ce6b
 TBD
