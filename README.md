@@ -2,7 +2,7 @@
 
 Setting up kubernetes can be daunting. This repository provides a quick and easy reference for setting up a development cluster on a single virtualization host.
 
-Helpful ```ops_*``` commands are provided to wrap kubeadm and kubectl commands.
+Helpful ```ops_*``` commands are provided to wrap kubeadm and kubectl commands. These are not an attempt at something like kops (https://github.com/kubernetes/kops) at all. They are simple wrappers for common provisioning use cases only.
 
 This repo was tested with VirtualBox on maxOS Catalina and Windows 10
 
@@ -28,6 +28,8 @@ vagrant ssh k8s-worker01
 vagrant ssh k8s-worker02
 ```
 
+WARNING: this repo publishes a test SSH key pair. Generate your own secure key pair and replace id_rsa and id_rsa.pub before creating the cluster.
+
 # Requirements
 
 At least one control node:
@@ -35,7 +37,7 @@ At least one control node:
 1. hostname: k8s-control01
 2. 4 Gb RAM
 3. 2 CPUs
-4. 30 Gb disk
+4. 30+ Gb disk
 5. Networking such that internet access is available and worker nodes are reachable
 6. Ubuntu 20.04 installed on the VM
 7. For convenience, make the username on the node the same on each node and the same as your host username
@@ -45,7 +47,7 @@ At least one worker node:
 1. hostname: k8s-worker01
 2. 4 Gb RAM
 3. 2 CPUs
-4. 30 Gb disk
+4. 30+ Gb disk
 5. Networking such that internet access is available and worker nodes and control plane nodes are reachable
 6. Ubuntu 20.04 installed on the VM
 7. For convenience, make the username on the node the same on each node and the same as your host username
