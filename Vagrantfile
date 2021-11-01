@@ -55,7 +55,7 @@ Vagrant.configure(2) do |config|
     if [ -e ops_start_cluster ]; then ./ops_start_cluster 192.168.2.0/24; fi
 
     mkdir -p /home/vagrant/.kube
-    if [[ "$HOSTNAME" =~ ^k8s-control ]]; then
+    if [ -e install_kube_config.sh ]; then
       ./install_kube_config.sh
     else
       scp -i /home/vagrant/.ssh/test-id_rsa -o "StrictHostKeyChecking no" vagrant@k8s-control01:.kube/config /home/vagrant/.kube/config
@@ -63,9 +63,6 @@ Vagrant.configure(2) do |config|
     chown -R vagrant:vagrant /home/vagrant/.kube
 
     if [ -e install_calico_cni.sh ]; then ./install_calico_cni.sh ; fi
-    if [[ "$HOSTNAME" =~ ^k8s-worker ]]; then
-      if [ -e install_kube_config.sh ]; then ./install_kube_config.sh; fi
-    fi
   SHELL
 
 end
