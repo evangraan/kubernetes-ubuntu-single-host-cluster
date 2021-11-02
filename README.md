@@ -2,9 +2,9 @@
 
 This repository provides a reference for setting up a development cluster on a single virtualization host.
 
-Helpful ```ops_*``` commands are provided to wrap kubeadm and kubectl commands. These are not an attempt at something like [kops](https://github.com/kubernetes/kops) at all. They are simple wrappers for common provisioning use cases only.
+Helpful ```ops_*``` commands are provided to wrap kubeadm and kubectl commands. These are not an attempt at something like kops (https://github.com/kubernetes/kops) at all. They are simple wrappers for common provisioning use cases only.
 
-This repo was tested with VirtualBox on maxOS Catalina and Windows 10. If you have an Ubuntu host, you can use the much simpler-to-setup [microk8s](https://ubuntu.com/blog/deploying-kubernetes-locally-microk8s)
+This repo was tested with VirtualBox on maxOS Catalina and Windows 10
 
 - [Introduction](#introduction)
 - [Automated Provisioning](#automated-provisioning)
@@ -24,7 +24,11 @@ This repo was tested with VirtualBox on maxOS Catalina and Windows 10. If you ha
 
 # Automated Provisioning
 
-The sections below detail step-by-step manual setup of the cluster. If you would like to set it up automatically, tweak the Vagrantfile in this repository to your needs. This Vagrantfile works with VirtualBox. Install vagrant on your host. Then:
+The sections below detail step-by-step manual setup of the cluster. If you would like to set it up automatically, tweak the Vagrantfile in this repository to your needs. This Vagrantfile works with VirtualBox. Install vagrant on your host.
+
+Edit ```Vagrantfile.cluster``` and set the static IP addresses you would like to use in the ```/etc/hosts``` section. Also set the internal kubernetes network CIDR.
+
+Copy the Vagrantfile you want to run (```Vagrantfile.cluster``` or ```Vagrantfile.storage```) to Vagrantfile and then:
 
 ```
 vagrant up

@@ -38,6 +38,7 @@ Vagrant.configure(2) do |config|
     subconfig.vm.network :public_network, ip: "192.168.1.12", nic_type: "virtio", bridge: "en1: Wi-Fi (AirPort)"
   end
 
+  ################ Configure your static IPs here
   config.vm.provision "shell", inline: <<-SHELL
     echo "192.168.1.10 k8s-cluster" >> /etc/hosts
     echo "192.168.1.10 k8s-control01" >> /etc/hosts
@@ -63,6 +64,8 @@ Vagrant.configure(2) do |config|
 
     if [ -e install_control.sh ]; then ./install_control.sh; fi
     if [ -e install_worker.sh ]; then ./install_worker.sh; fi
+    
+    ################ Configure your CIDR here
     if [ -e ops_start_cluster ]; then sudo -H -u vagrant bash -c "cd /home/vagrant && ./ops_start_cluster 192.168.2.0/24"; fi
 
     mkdir -p /home/vagrant/.kube
