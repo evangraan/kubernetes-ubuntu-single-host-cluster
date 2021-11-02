@@ -275,8 +275,6 @@ Point a browser on the development device to http://localhost:8080 to consume th
 curl -X POST -d 'test' localhost:8080
 ```
 
-MetalLB : TBD
-Other method examples: TBD
 
 # Scaling
 
@@ -284,69 +282,27 @@ TBD
 
 # Storage
 
-Since the requirements for this reference implementation required 30 Gb of disk space for each node, there should be at least 8 Gb of disk space available on all nodes.
+If storage is desired, a separate vagrant configuration has been provided for convenience:
 
-You could create a separate VM as the Linstor controller and two additional VMs as storage nodes. In this implementation how-ever I use control01 as the Linstor controller of type 'combined', i.e. it is also a storage node and worker01 and worker02 as storage nodes.
+Making sure you use Vagrantfile.storage, do a vagrant up
 
-If you choose to dedicate storage nodes, then on the kubernetes cluster you will need to make the storage available using 
+Once the VMs are available, power them off and add an additional storage disk to each (at least 2Gb).
 
+Start the VMs up all again and on each do:
 ```
-linstor resource create NODE-NAME k8_storage_res --drbd-diskless
-```
-
-in order to access it from the worker containers as persistent volumes.
-
-## Installation of Linstor, DRBD and LVM
-On all 3 nodes:
-
-```
-sudo -i
-add-apt-repository -y ppa:linbit/linbit-drbd9-stack; apt-get update; apt-get install -y --no-install-recommends drbd-dkms drbd-utils lvm2 linstor-satellite linstor-client
+	sudo pvcreate /dev/sdc # Replace sdc with your storage disk's device index
+	sudo vgcreate vg /dev/sdc
+	sudo lvcreate -l 100%FREE  --thinpool vg/lvmthinpool
 ```
 
-Only on control01 (the Linstor controller):
+Then on the control node:
 ```
-sudo apt-get install linstor-controller --no-install-recommends
-sudo systemctl enable --now linstor-controller
-linstor node list
-```
-
-There should be no nodes listed.
-
-Add control01, worker01 and worker02 as nodes. This all takes place in the control01 node shell:
-```
-linstor node create k8s-control01 192.168.1.109 --node-type combined
-linstor node create k8s-worker01 192.168.1.148
-linstor node create k8s-worker02 192.168.1.98
-linstor node list
-```
-
-Find the name of the volume group (VGROUPNAME, in the example below all VMs have the same volume group name 'ubuntu-vg') on each node:
-```
-vgs
-```
-
-Now add a storage pool:
-
-```
-linstor storage-pool create lvm k8s-control01 pool_k8s ubuntu-vg
-linstor storage-pool create lvm k8s-worker01 pool_k8s ubuntu-vg
-linstor storage-pool create lvm k8s-worker02 pool_k8s ubuntu-vg
-linstor storage-pool list
-```
-Note: this can take a long time and you might receive an error: 'Socket timeout, no data received for more than 300s'. If the storage-pool list command how-ever shows all the volumes and their statuses are OK, all should be good.
-
-Create the distributed storage volume group and storage resources:
-```
-linstor resource-group create k8s_storage_group --storage-pool pool_k8s --place-count 2
-linstor volume-group create k8s_storage_group
-linstor resource-group spawn-resources k8s_storage_group k8_storage_res 6G
-linstor resource list
-```
+	linstor storage-pool create lvmthin linstor-master1 linstor-pool vg/lvmthinpool
+	linstor storage-pool create lvmthin linstor-master2 linstor-pool vg/lvmthinpool
+	linstor storage-pool create lvmthin linstor-master3 linstor-pool vg/lvmthinpool
+	```
 
 
-Linstor + DRBD _ ZFS: https://brian-candler.medium.com/linstor-networked-storage-without-the-complexity-c3178960ce6b
-TBD
 
 # Issues
 
