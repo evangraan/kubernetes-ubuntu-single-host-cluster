@@ -6,19 +6,21 @@ Helpful ```ops_*``` commands are provided to wrap kubeadm and kubectl commands. 
 
 This repo was tested with VirtualBox on maxOS Catalina and Windows 10
 
-# Table of contents
-- [Introduction](./README.md#introduction)
-- [Automated provisioning]("./README.md#automatedprovisioning")
-- [Requirements](./README.md#requirements)
-- [Host setup](./README.md#hostsetup)
-- [Installation of the controllers](./README.md#controllers)
-- [Installation of the workers](./README.md#workers)
-- [Helm package manager](./README.md#helm)
-- [App deployment](./README.md#appdeployment)
-- [External access to cluster services](./README.md#externalAccess)
-- [Storage cluster](./README.md#storage)
-- [Using storage pools in kubernetes](./README.md#persistentvolumeclaim)
-- [Issues](./README.md#issues)
+- [Introduction](#introduction)
+- [Automated Provisioning](#automated-provisioning)
+- [Requirements](#requirements)
+- [Host setup](#host-setup)
+- [Controllers](#controllers)
+- [Workers](#workers)
+- [Helm](#helm)
+- [App deployment](#app-deployment)
+- [External access](#external-access)
+  - [Nodeport](#nodeport)
+  - [Load balancer](#load-balancer)
+  - [SSH tunnel](#ssh-tunnel)
+- [Storage](#storage)
+- [Using storage pools in kubernetes](#using-storage-pools-in-kubernetes)
+- [Issues](#issues)
 
 # Automated Provisioning
 
