@@ -8,9 +8,19 @@ This repo was tested with VirtualBox on maxOS Catalina and Windows 10
 
 # Table of contents
 [Introduction](./README.md#Introduction)
-[Automated provisioning](./README.md#Automated provisioning)
+[Automated provisioning]("./README.md#AutomatedProvisioning")
+[Requirements](./README.md#Requirements)
+[Host setup](./README.md#HostSetup)
+[Installation of the controllers](./README.md#Controllers)
+[Installation of the workers](./README.md#Workers)
+[Helm package manager](./README.md#Helm)
+[App deployment](./README.md#AppDeployment)
+[External access to cluster services](./README.md#ExternalAccess)
+[Storage cluster](./README.md#Storage)
+[Creating storage in kubernetes using the storage cluster](./README.md#PersistentVolumeClaim)
+[Issues](./README.md#Issues)
 
-# Automated provisioning
+# AutomatedProvisioning
 
 The sections below detail step-by-step manual setup of the cluster. If you would like to set it up automatically, tweak the Vagrantfile in this repository to your needs. This Vagrantfile works with VirtualBox. Install vagrant on your host. Then:
 
@@ -58,7 +68,7 @@ At least one worker node:
 6. Ubuntu 20.04 installed on the VM
 7. For convenience, make the username on the node the same on each node and the same as your host username
 
-# Setup of host
+# HostSetup
 
 1. Boot up the control nodes and worker nodes.
 2. Determine their IP addresses (either from your DHCP router or by ```ip a l``` on the nodes after they have booted)
@@ -72,7 +82,7 @@ $ sudo vi /etc/hosts
 192.168.1.98 k8s-worker02
 ```
 
-# Installation of control node
+# Controllers
 
 Once Ubuntu 20.04 has been installed, copy ```scripts/control/*``` script onto the node:
 
@@ -114,7 +124,7 @@ Install the calico CNI:
 ./install_calico_cni.sh
 ```
 
-# Installation of worker node
+# Workers
 
 Once Ubuntu 20.04 has been installed, copy ```scripts/worker/*``` script onto the node:
 
@@ -162,7 +172,7 @@ Join the cluster using the cluster token and hash:
 ./ops_join_cluster TOKEN HASH
 ```
 
-# Helm package manager
+# Helm
 On the control node, install helm:
 
 ```
@@ -171,7 +181,7 @@ chmod 700 get_helm.sh
 ./get_helm.sh
 ```
 
-# App deployment
+# AppDeployment
 
 To deploy an example echo service to test that deployment works, on a control node:
 
@@ -206,7 +216,7 @@ Test that the app is running by sending it some data and seeing the echo:
 curl -X POST -d 'test' CLUSTER-IP:8080
 ```
 
-# External access to the app
+# ExternalAccess
 Kubernetes provides a number of methods to allow external access to the cluster to consume services.
 
 ## Nodeport
@@ -316,7 +326,7 @@ Ensure the storage pool is configured correctly and available:
 linstor storage-pool list
 ```
 
-# Creating storage in kubernetes using the storage cluster
+# PersistentVolumeClaim
 
 On k8s-control01:
 
