@@ -7,18 +7,18 @@ Helpful ```ops_*``` commands are provided to wrap kubeadm and kubectl commands. 
 This repo was tested with VirtualBox on maxOS Catalina and Windows 10
 
 # Table of contents
-- [Introduction](./README.md#Introduction)
-- [Automated provisioning]("./README.md#AutomatedProvisioning")
-- [Requirements](./README.md#Requirements)
-- [Host setup](./README.md#HostSetup)
-- [Installation of the controllers](./README.md#Controllers)
-- [Installation of the workers](./README.md#Workers)
-- [Helm package manager](./README.md#Helm)
-- [App deployment](./README.md#AppDeployment)
-- [External access to cluster services](./README.md#ExternalAccess)
-- [Storage cluster](./README.md#Storage)
-- [Creating storage in kubernetes using the storage cluster](./README.md#PersistentVolumeClaim)
-- [Issues](./README.md#Issues)
+- [Introduction](./README.md#introduction)
+- [Automated provisioning]("./README.md#automatedprovisioning")
+- [Requirements](./README.md#requirements)
+- [Host setup](./README.md#hostsetup)
+- [Installation of the controllers](./README.md#controllers)
+- [Installation of the workers](./README.md#workers)
+- [Helm package manager](./README.md#helm)
+- [App deployment](./README.md#appdeployment)
+- [External access to cluster services](./README.md#externalAccess)
+- [Storage cluster](./README.md#storage)
+- [Creating storage in kubernetes using the storage cluster](./README.md#persistentvolumeclaim)
+- [Issues](./README.md#issues)
 
 # AutomatedProvisioning
 
