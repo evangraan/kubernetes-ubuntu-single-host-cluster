@@ -276,10 +276,6 @@ curl -X POST -d 'test' localhost:8080
 ```
 
 
-# Scaling
-
-TBD
-
 # Storage
 
 If storage is desired, a separate vagrant configuration has been provided for convenience:
@@ -295,6 +291,12 @@ Start the VMs up all again and on each do:
 	sudo lvcreate -l 100%FREE  --thinpool vg/lvmthinpool
 ```
 
+Ensure all nodes are configured and online:
+
+```
+linstore node list
+```
+
 Then on the control node:
 ```
 	linstor storage-pool create lvmthin linstor-master1 linstor-pool vg/lvmthinpool
@@ -302,7 +304,61 @@ Then on the control node:
 	linstor storage-pool create lvmthin linstor-master3 linstor-pool vg/lvmthinpool
 	```
 
+Ensure the storage pool is configured correctly and available:
 
+```
+linstor storage-pool list
+```
+
+# Creating storage in kubernetes using the storage cluster
+
+On k8s-control01:
+
+```
+TAG=v0.7.4
+CONTROLLER_IP=192.168.1.20
+
+curl https://raw.githubusercontent.com/LINBIT/linstor-csi/$TAG/examples/k8s/deploy/linstor-csi-1.14.yaml | sed "s/linstor-controller.example.com/$CONTROLLER_IP/g" | kubectl apply -f -
+
+watch kubectl -n kube-system get all
+```
+
+Create a storage class:
+
+```
+REPLICAS=3
+
+cat <<EOF | kubectl apply -f -
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: linstor
+provisioner: linstor.csi.linbit.com
+parameters:
+  autoPlace: "$REPLICAS"
+  storagePool: "linstor-pool"
+EOF 
+```
+
+Create a PVC test the storage cluster and its use from the kubernetes cluster:
+
+```
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: test-pvc
+spec:
+  storageClassName: linstor
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+EOF
+
+kubectl get pvc
+```
 
 # Issues
 
