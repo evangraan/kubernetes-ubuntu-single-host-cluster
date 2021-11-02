@@ -6,6 +6,10 @@ Helpful ```ops_*``` commands are provided to wrap kubeadm and kubectl commands. 
 
 This repo was tested with VirtualBox on maxOS Catalina and Windows 10
 
+# Table of contents
+[Introduction](./README.md#Introduction)
+[Automated provisioning](./README.md#Automated provisioning)
+
 # Automated provisioning
 
 The sections below detail step-by-step manual setup of the cluster. If you would like to set it up automatically, tweak the Vagrantfile in this repository to your needs. This Vagrantfile works with VirtualBox. Install vagrant on your host. Then:
