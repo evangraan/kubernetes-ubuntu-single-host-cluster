@@ -1,6 +1,6 @@
 # Introduction
 
-Setting up kubernetes can be daunting. This repository provides a quick and easy reference for setting up a development cluster on a single virtualization host.
+This repository provides a reference for setting up a development cluster on a single virtualization host.
 
 Helpful ```ops_*``` commands are provided to wrap kubeadm and kubectl commands. These are not an attempt at something like kops (https://github.com/kubernetes/kops) at all. They are simple wrappers for common provisioning use cases only.
 
