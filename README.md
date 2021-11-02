@@ -17,10 +17,10 @@ This repo was tested with VirtualBox on maxOS Catalina and Windows 10
 - [App deployment](./README.md#appdeployment)
 - [External access to cluster services](./README.md#externalAccess)
 - [Storage cluster](./README.md#storage)
-- [Creating storage in kubernetes using the storage cluster](./README.md#persistentvolumeclaim)
+- [Using storage pools in kubernetes](./README.md#persistentvolumeclaim)
 - [Issues](./README.md#issues)
 
-# AutomatedProvisioning
+# Automated Provisioning
 
 The sections below detail step-by-step manual setup of the cluster. If you would like to set it up automatically, tweak the Vagrantfile in this repository to your needs. This Vagrantfile works with VirtualBox. Install vagrant on your host. Then:
 
@@ -68,7 +68,7 @@ At least one worker node:
 6. Ubuntu 20.04 installed on the VM
 7. For convenience, make the username on the node the same on each node and the same as your host username
 
-# HostSetup
+# Host setup
 
 1. Boot up the control nodes and worker nodes.
 2. Determine their IP addresses (either from your DHCP router or by ```ip a l``` on the nodes after they have booted)
@@ -181,7 +181,7 @@ chmod 700 get_helm.sh
 ./get_helm.sh
 ```
 
-# AppDeployment
+# App deployment
 
 To deploy an example echo service to test that deployment works, on a control node:
 
@@ -216,7 +216,7 @@ Test that the app is running by sending it some data and seeing the echo:
 curl -X POST -d 'test' CLUSTER-IP:8080
 ```
 
-# ExternalAccess
+# External access
 Kubernetes provides a number of methods to allow external access to the cluster to consume services.
 
 ## Nodeport
@@ -326,7 +326,7 @@ Ensure the storage pool is configured correctly and available:
 linstor storage-pool list
 ```
 
-# PersistentVolumeClaim
+# Using storage pools in kubernetes
 
 On k8s-control01:
 
