@@ -1,0 +1,70 @@
+BOX_IMAGE = "ubuntu/focal64"
+
+Vagrant.configure(2) do |config|
+
+  config.vm.define "linstor-control01" do |subconfig|
+    subconfig.vm.provider "virtualbox" do |vb|
+      vb.gui = false
+      vb.name = "linstor-control01"
+        vb.memory = "2048"
+        vb.cpus = "1"
+      end
+    subconfig.vm.hostname = "linstor-control01"
+    subconfig.vm.box = BOX_IMAGE
+    subconfig.vm.network :public_network, ip: "192.168.1.20", nic_type: "virtio", bridge: "en1: Wi-Fi (AirPort)"
+  end
+
+  config.vm.define "linstor-data01" do |subconfig|
+    subconfig.vm.provider "virtualbox" do |vb|
+      vb.gui = false
+      vb.name = "linstor-data01"
+        vb.memory = "2048"
+        vb.cpus = "1"
+      end
+    subconfig.vm.hostname = "linstor-data01"
+    subconfig.vm.box = BOX_IMAGE
+    subconfig.vm.network :public_network, ip: "192.168.1.21", nic_type: "virtio", bridge: "en1: Wi-Fi (AirPort)"
+  end
+
+  config.vm.define "linstor-data02" do |subconfig|
+    subconfig.vm.provider "virtualbox" do |vb|
+      vb.gui = false
+      vb.name = "linstor-data02"
+        vb.memory = "2048"
+        vb.cpus = "1"
+      end
+    subconfig.vm.hostname = "linstor-data02"
+    subconfig.vm.box = BOX_IMAGE
+    subconfig.vm.network :public_network, ip: "192.168.1.22", nic_type: "virtio", bridge: "en1: Wi-Fi (AirPort)"
+  end
+
+  config.vm.provision "shell", inline: <<-SHELL
+    echo "192.168.1.20 linstor-control01" >> /etc/hosts
+    echo "192.168.1.21 linstor-data01" >> /etc/hosts
+    echo "192.168.1.22 linstor-data02" >> /etc/hosts
+    apt-get install -y linux-headers-$(uname -r)
+    add-apt-repository ppa:linbit/linbit-drbd9-stack
+    apt-get update -y
+
+    debconf-set-selections <<< "postfix postfix/mailname string linstor.local"
+    debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
+    apt-get install --assume-yes postfix
+
+    apt install -y drbd-utils drbd-dkms lvm2
+    modprobe drbd
+    echo drbd > /etc/modules-load.d/drbd.conf
+    if [[ "$HOSTNAME" =~ ^linstor-data ]]; then
+      apt install -y linstor-satellite  linstor-client
+    fi
+    systemctl enable  linstor-satellite
+    systemctl start linstor-satellite
+    if [[ "$HOSTNAME" =~ ^linstor-control ]]; then
+      apt install -y linstor-controller linstor-satellite  linstor-client
+      systemctl enable linstor-controller
+      systemctl start linstor-controller
+      linstor node create linstor-master1 192.168.1.20
+      linstor node create linstor-master2 192.168.1.21
+      linstor node create linstor-master3 192.168.1.22
+    fi
+  SHELL
+end
