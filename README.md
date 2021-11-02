@@ -30,6 +30,8 @@ vagrant ssh k8s-worker02
 
 WARNING: this repo publishes a test SSH key pair. Generate your own secure key pair and replace id_rsa and id_rsa.pub before creating the cluster.
 
+To additionally add a storage cluster, you can use the vagrant configuration provided in the [storage](./README.md#Storage) section of this README.
+
 # Requirements
 
 At least one control node:
@@ -299,10 +301,10 @@ linstore node list
 
 Then on the control node:
 ```
-	linstor storage-pool create lvmthin linstor-master1 linstor-pool vg/lvmthinpool
-	linstor storage-pool create lvmthin linstor-master2 linstor-pool vg/lvmthinpool
-	linstor storage-pool create lvmthin linstor-master3 linstor-pool vg/lvmthinpool
-	```
+linstor storage-pool create lvmthin linstor-master1 linstor-pool vg/lvmthinpool
+linstor storage-pool create lvmthin linstor-master2 linstor-pool vg/lvmthinpool
+linstor storage-pool create lvmthin linstor-master3 linstor-pool vg/lvmthinpool
+```
 
 Ensure the storage pool is configured correctly and available:
 
