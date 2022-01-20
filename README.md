@@ -316,7 +316,7 @@ Start the VMs up all again and on each do:
 Ensure all nodes are configured and online:
 
 ```
-linstore node list
+linstor node list
 ```
 
 Then on the control node:
