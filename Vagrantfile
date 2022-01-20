@@ -46,6 +46,9 @@ Vagrant.configure(2) do |config|
     echo "192.168.1.10 k8s-control01" >> /etc/hosts
     echo "192.168.1.11 k8s-worker01" >> /etc/hosts
     echo "192.168.1.12 k8s-worker02" >> /etc/hosts
+    echo "192.168.1.20 linstor-control01" >> /etc/hosts
+    echo "192.168.1.21 linstor-data01" >> /etc/hosts
+    echo "192.168.1.22 linstor-data02" >> /etc/hosts
     git clone https://github.com/evangraan/kubernetes-ubuntu-single-host-cluster
     HOSTNAME=$(hostname)
     if [[ "$HOSTNAME" =~ ^k8s-control ]]; then
