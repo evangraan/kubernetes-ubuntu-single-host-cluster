@@ -255,12 +255,19 @@ Use MetalLB as a load balancer:
 ```
 vi metallb.yaml
 
-  address-pools:
-   - name: default
-     protocol: layer2
-     addresses:
-     - LAN-CIDR/MASK-FOR-RESERVED-IP-POOL
-     # e.g. 192.168.1.0/26 (.0 - .63 reserved for MetalLB)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: metallb-system
+  name: config
+data:
+  config: |
+    address-pools:
+    - name: default
+      protocol: layer2
+      addresses:
+      - LAN-CIDR/MASK-FOR-RESERVED-IP-POOL
+      # e.g. 192.168.1.0/26 (.0 - .63 reserved for MetalLB)
 
 helm repo add metallb https://metallb.github.io/metallb
 helm install metallb metallb/metallb -f metallb.yaml
@@ -335,6 +342,24 @@ linstor storage-pool list
 # Using storage pools in kubernetes
 
 On k8s-control01:
+
+```
+vi /etc/kubernetes/manifests/kube-apiserver.yaml
+```
+
+Add:
+
+```
+spec:
+  containers:
+  - command:
+    - kube-apiserver
+    ... snip ...
+    - --feature-gates=KubeletPluginsWatcher=true,CSINodeInfo=true
+    ... snip ...
+```
+
+Then on the shell:
 
 ```
 TAG=v0.7.4
